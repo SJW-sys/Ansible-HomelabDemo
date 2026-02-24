@@ -1,0 +1,59 @@
+---
+- name: Install CrowdSec and IP Bouncer on Debian
+  hosts: all
+  become: true
+
+  tasks:
+    - name: debian based
+      when: ansible_os_family == "Debian"
+      block:
+        ## Install CrowdSec
+        - name: Install CrowdSec package
+          apt:
+            name: crowdsec
+            state: latest
+            update_cache: yes
+
+        ## Install the IP bouncer (iptables‑bouncer)
+        - name: Install CrowdSec firewall bouncer package
+          apt:
+            name: crowdsec-firewall-bouncer
+            state: present
+
+    ## Enable UFW logging, which is recommended for Crowdsec ip bouncers
+    - name: Turn on UFW logging
+      command: ufw logging on
+      register: ufw_logging_result
+      changed_when: "'Logging' in ufw_logging_result.stdout"
+
+    ## Enable & start services
+    - name: Ensure crowdsec service is enabled and started
+      systemd:
+        name: crowdsec
+        enabled: true
+        state: started
+
+    - name: Ensure crowdsec-firewall-bouncer service is enabled and started
+      systemd:
+        name: crowdsec-firewall-bouncer
+        enabled: true
+        state: started
+
+    ## Verify installation (debug output)
+    - name: Show CrowdSec version
+      command: crowdsec -version
+      register: cs_version
+      changed_when: false
+    
+    - name: Print if UFW Logging is on
+      debug:
+        msg: "{{ ufw_logging_result.stdout }}"
+
+    - name: Show bouncer status
+      command: systemctl status crowdsec-firewall-bouncer
+      register: bouncer_status
+      changed_when: false
+
+    - name: Print bouncer status (short)
+      debug:
+        msg: "{{ bouncer_status.stdout_lines[:10] }}"

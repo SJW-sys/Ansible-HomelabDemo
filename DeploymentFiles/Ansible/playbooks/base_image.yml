@@ -1,0 +1,56 @@
+---
+ - name: Base configuration for all new host
+   hosts: all
+   become: true
+   tasks:
+
+   - name: install tasks - Debian
+     when: ansible_os_family == "Debian"
+     block:
+
+      - name: update repository index
+        apt:
+          update_cache: yes
+
+      - name: upgrade
+        apt:
+          upgrade: dist
+
+      - name: install vim package
+        apt:
+          name: vim
+          state: latest
+
+      - name: install curl package
+        apt:
+          name: curl
+          state: latest
+
+      - name: install sudo package
+        apt:
+          name: sudo
+          state: latest
+
+      - name: install AppArmor package
+        apt:
+          name: 
+            - apparmor
+            - apparmor-utils
+          state: latest
+
+   - name: Final tasks - Debian
+     when: ansible_os_family == "Debian"
+     block:
+
+      - name: enable AppArmor package
+        systemd:
+          name: apparmor
+          enabled: yes
+          state: started
+
+      - name: Clean up unused packages, cache and configs
+        apt:
+          clean: yes
+          autoremove: yes
+          purge: yes
+          cache_valid_time: 3600

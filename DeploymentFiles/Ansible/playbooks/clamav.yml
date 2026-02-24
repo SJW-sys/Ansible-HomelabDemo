@@ -1,0 +1,44 @@
+---
+- name: Install clamAV, configure and build baseline
+  hosts: all
+  become: true
+  tasks:
+
+    - name: Install ClamAV
+      when: ansible_os_family == "Debian"
+      apt:
+        name: clamav-daemon
+        state: latest
+
+    - name: ensure quarantine space exist
+      file:
+        path: /var/lib/clamav/quarantine
+        state: directory
+        mode: '0660'
+        owner: clamav
+        group: clamav
+
+    - name: Add clamAV scan to its config file
+      lineinfile:
+        path: /etc/cron.d/clamdscan         # target file
+        line: "30 2 * * 0 clamav /usr/bin/clamdscan --fdpass --log=/var/log/clamav/clamdscan.log --move=/var/lib/clamav/quarantine /"        # exact line you want
+        insertafter: EOF                     # where to put it (end of file)
+        state: present                       # default, keeps the line
+        create: yes                          # create the file if it does not exist
+
+    - name: Setup Excluded Paths that have frequent false alarms.
+      lineinfile:
+        path: /etc/clamav/clamd.conf        # target file
+        line: "ExcludePath ^/proc\nExcludePath ^/sys\nExcludePath ^/run\nExcludePath ^/dev\nExcludePath ^/snap\nExcludePath ^/root/quarantine\n"        # exact line you want
+        insertafter: EOF                     # where to put it (end of file)
+        state: present                       # default, keeps the line
+        create: yes                          # create the file if it does not exist
+
+    - name: enable and start ClamAV
+      systemd:
+        name: clamav-daemon
+        enabled: true
+        state: started
+        
+    - name: run clamAV base scan - takes 40mins or so
+      command: /usr/bin/clamdscan --fdpass --log=/var/log/clamav/clamdscan.log --move=/root/quarantine /

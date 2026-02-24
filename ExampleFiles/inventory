@@ -1,0 +1,71 @@
+# Version: 2026.02.05.001
+# Ansible inventory
+
+#### Global variables ####
+[all:vars]
+# Connection settings
+ansible_user            = ansible               # default SSH user
+ansible_ssh_private_key_file = ~/.ssh/id_rsa   # private key to use
+ansible_port            = FIXME
+# Common Python interpreter (useful for newer distros)
+ansible_python_interpreter = /usr/bin/python3
+
+#### Host groups ####
+# Linux servers
+[linux]
+web01.example.com
+db01.example.com
+
+# Windows Servers
+[windows]
+
+# docker host servers
+[docker]
+
+# Testing space servers
+[test]
+
+# Prod servers
+[prod]
+
+#### Sub‑groups (inherit variables from parent groups) ####
+# Database tier – separate vars
+[dbtier:children]
+linux
+
+[dbtier:vars]
+postgresql_version = 15
+pg_data_dir         = /var/lib/postgresql/15/main
+
+####  Host‑specific variables ####
+# Override or add vars for a single host
+[web01.example.com:vars]
+ansible_host = 203.0.113.10          # IP address if DNS isn’t set
+app_env     = production
+
+[db01.example.com:vars]
+ansible_host = 203.0.113.20
+pg_hba_conf = /etc/postgresql/15/main/pg_hba.conf
+
+####  Dynamic inventory placeholder (optional) ####
+# If you later switch to a cloud plugin (e.g., AWS EC2, GCP), you can
+# reference it here. Commented out for now.
+# [dynamic]
+# plugin = amazon.aws.ec2
+# regions = us-east-1,eu-west-1
+# filters = {"tag:Environment":"prod"}
+
+# ------------------------------------------------------------
+# Usage examples
+# ------------------------------------------------------------
+# Run a play against all web servers:
+#   ansible-playbook -i hosts.ini site.yml -l webservers
+#
+# Run a play against just db01:
+#   ansible-playbook -i hosts.ini db-setup.yml -l db01.example.com
+#
+# Include group vars in a playbook:
+#   - hosts: webtier
+#     vars:
+#       extra_var: foo
+# ------------------------------------------------------------
