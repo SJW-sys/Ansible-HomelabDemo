@@ -47,9 +47,6 @@ Not this project.
 ### Was AI used to generate this?
 In part, I used it for going back and forth on tweaking example Inventory and ansible.cfg files that I use and have provided bases for here. Otherwise all the other files were made and designed, but I have learned and expanded my knowledge of the tools within this project (and prior projects) with AI to design a better solution and skills for other deployments. AI I see as a tool and resource that is loose in the market place regardless of your stance, that you need to follow, know how to use, while educating others on its complexities and putting safeguards around it. I firmly design and deploy with my own brainstorming, knowledge, and troubleshooting as my first approach, but i have used AI to troubleshoot, help expand understanding, research, interpreter (ie. Bash to Go), rapid scaling and experimented with vibe coding. I have deeper thoughts and opinions, but those are better discussed rather than a few sentences in a git repo. 
 
-## Issues to note with this "demo"
-I wanted to do a proper code repo that could be poke around so you could see commits and pulls that you might normally see in a team production repo, unfortunately due to the overhead and this [issue](https://github.com/orgs/community/discussions/6292), I will be "cutting corners" and doing everything locally then pushing to main directly from my machine. However, I will still leave the demo "main" and "test" branches with there protections.
-
 ## Docker features, CI/CD tooling/skills, and other tools leveraged in this project.
 - ansible
 - Yaml
